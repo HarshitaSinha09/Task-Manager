@@ -65,7 +65,7 @@ Team_Task_Manager/
 │
 ├── Frontend/
 │   ├── pages/
-│   ├── components/
+│   ├── routes/
 │   ├── context/
 │   └── api/
 
