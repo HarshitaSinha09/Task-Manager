@@ -82,7 +82,7 @@ const Projects = () => {
       </p>
     </div>
 
-    {/* ✨ CREATE PROJECT */}
+    {/*  CREATE PROJECT */}
     <div className="backdrop-blur-lg bg-white/60 border border-white/40 p-5 rounded-2xl shadow-xl flex gap-3 mb-10">
       <input
         className="flex-1 p-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -104,9 +104,9 @@ const Projects = () => {
       </button>
     </div>
 
-    {/* 📦 PROJECTS */}
+    {/*  PROJECTS */}
     {loading ? (
-      <p className="text-gray-700">Loading...</p>
+      <p className="text-gray-700">Loading Projects...</p>
     ) : (
       <div className="grid grid-cols-3 gap-8">
         {projects.map((p) => (
@@ -114,13 +114,13 @@ const Projects = () => {
             key={p.id}
             className="backdrop-blur-lg bg-white/60 border border-white/40 p-6 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 hover:scale-[1.02] transition duration-300"
           >
-            {/* 🧠 TITLE */}
+            {/*  TITLE */}
             <h2 className="font-bold text-lg text-gray-800">
               {p.name}
             </h2>
             <p className="text-gray-600 text-sm">{p.description}</p>
 
-            {/* 🎯 STATUS */}
+            {/*  STATUS */}
             <div className="mt-4">
               <span className="text-sm text-gray-600">Status: </span>
 
@@ -137,7 +137,7 @@ const Projects = () => {
               </span>
             </div>
 
-            {/* 🔘 BUTTONS */}
+            {/*  BUTTONS */}
             <div className="mt-6 flex flex-col gap-3">
               <button
                 onClick={() => changeStatus(p.id, p.status)}

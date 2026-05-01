@@ -22,10 +22,9 @@ export const AuthProvider = ({ children }) => {
 
   // Call this after login or register — saves token then fetches user info
 const login = async (token) => {
-  localStorage.setItem("token", token);       // save token first
-  const res = await API.get("/dashboard/user"); // then fetch user
-  setUser(res.data);                           // then set user
-  // only NOW does the caller's await resolve, so navigate fires after setUser
+  localStorage.setItem("token", token);       
+  const res = await API.get("/dashboard/user");
+  setUser(res.data);                        
 };
 
   const logout = () => {

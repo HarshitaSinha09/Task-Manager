@@ -1,6 +1,8 @@
 import { useState } from "react";
 import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Register = () => {
   const [data, setData] = useState({
@@ -27,10 +29,10 @@ const Register = () => {
 
     try {
       await API.post("/auth/register", data);
-      alert("✅ Account created successfully!");
-navigate("/");
+      toast.success("Account created successfully 🎉");
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
-      setError(err.response?.data || "Registration failed. Please try again.");
+      toast.error(err.response?.data || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -104,18 +106,18 @@ return (
         disabled={loading}
         className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition disabled:opacity-50"
       >
-        {loading ? "Registering..." : "Register"}
+        {loading ? "Signing up..." : "Sign Up"}
       </button>
 
       {/* 🔗 LOGIN */}
       <p className="mt-5 text-center text-sm text-gray-700">
         Already have an account?{" "}
-        <a
-          href="/"
+        <Link
+          to="/"
           className="font-semibold text-purple-700 hover:underline"
         >
           Login here
-        </a>
+        </Link>
       </p>
     </div>
   </div>

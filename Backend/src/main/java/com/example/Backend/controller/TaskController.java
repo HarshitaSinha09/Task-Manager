@@ -93,11 +93,17 @@ public class TaskController {
         String email = auth.getName();
         User user = authService.getUserByEmail(email);
 
-        if (!"ADMIN".equals(user.getRole())) {
-            throw new RuntimeException("Only ADMIN can delete tasks");
+        Task task = taskService.getTaskById(id);
+
+        if ("ADMIN".equals(user.getRole())) {
+            taskService.deleteTask(id);
+            return "Deleted by admin";
+        }
+        if ("MEMBER".equals(user.getRole()) && task.getAssignedTo().equals(user.getId())) {
+            taskService.deleteTask(id);
+            return "Deleted your own task";
         }
 
-        taskService.deleteTask(id);
-        return "Task deleted successfully";
+        throw new RuntimeException("You can only delete your own tasks");
     }
 }

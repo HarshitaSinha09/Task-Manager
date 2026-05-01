@@ -1,106 +1,124 @@
 import { useEffect, useState, useContext } from "react";
 import API from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
-  const fetchTasks = async () => {
-    try {
-      const res = await API.get("/tasks");
-      setTasks(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+const fetchTasks = async () => {
+  setLoading(true);
+
+  try {
+    const res = await API.get("/tasks");
+    setTasks(res.data);
+  } catch (err) {
+    toast.error("Failed to load tasks");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 🔄 STATUS CHANGE
-  const changeStatus = async (id, currentStatus) => {
-    let nextStatus;
+const changeStatus = async (id, currentStatus) => {
+  let nextStatus;
 
-    if (currentStatus === "TODO") nextStatus = "IN_PROGRESS";
-    else if (currentStatus === "IN_PROGRESS") nextStatus = "DONE";
-    else return;
+  if (currentStatus === "TODO") nextStatus = "IN_PROGRESS";
+  else if (currentStatus === "IN_PROGRESS") nextStatus = "DONE";
+  else return;
 
-    try {
-      await API.put(`/tasks/${id}?status=${nextStatus}`);
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  try {
+    await API.put(`/tasks/${id}?status=${nextStatus}`);
+    fetchTasks();
+    toast.success("Status updated");
+  } catch (err) {
+    console.log(err.response?.data); // 👈 debug
+    toast.error("Failed to update status");
+  }
+};
 
   // ❌ DELETE TASK
-  const deleteTask = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
-    if (!confirmDelete) return;
+const deleteTask = async (id) => {
+  const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+  if (!confirmDelete) return;
 
-    try {
-      await API.delete(`/tasks/${id}`);
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  try {
+    await API.delete(`/tasks/${id}`);
+
+    // 🔥 instant UI update (better UX than refetch)
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+
+    toast.success("Task deleted successfully");
+  } catch (err) {
+    console.log(err.response?.data || err.message);
+    toast.error("Failed to delete task");
+  }
+};
 
   return (
     <div className="min-h-screen p-10 bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-300">
 
       {/* HEADER */}
       <h1 className="text-3xl font-extrabold text-gray-800 mb-8">
-        {user?.role === "ADMIN" ? "📋 All Tasks" : "🧑 My Tasks"}
+        {user?.role === "ADMIN" ? "📋 All Tasks" : "📁 My Tasks"}
       </h1>
 
-      {/* TASK GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="backdrop-blur-lg bg-white/60 border border-white/40 p-5 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition"
+{/* TASK GRID */}
+{loading ? (
+  <p className="text-center text-gray-700 text-lg">
+    Loading tasks...
+  </p>
+) : (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {tasks.map((task) => (
+      <div
+        key={task.id}
+        className="backdrop-blur-lg bg-white/60 border border-white/40 p-5 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition"
+      >
+        <h2 className="font-bold text-gray-800">{task.title}</h2>
+
+        <p className="mt-2 text-sm text-gray-600">
+          Status:{" "}
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              task.status === "TODO"
+                ? "bg-blue-200 text-blue-800"
+                : task.status === "IN_PROGRESS"
+                ? "bg-yellow-300 text-yellow-900"
+                : "bg-green-300 text-green-900"
+            }`}
           >
-            {/* TITLE */}
-            <h2 className="font-bold text-gray-800">{task.title}</h2>
+            {task.status}
+          </span>
+        </p>
 
-            {/* STATUS */}
-            <p className="mt-2 text-sm text-gray-600">
-              Status:{" "}
-              <span
-                className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  task.status === "TODO"
-                    ? "bg-blue-200 text-blue-800"
-                    : task.status === "IN_PROGRESS"
-                    ? "bg-yellow-300 text-yellow-900"
-                    : "bg-green-300 text-green-900"
-                }`}
-              >
-                {task.status}
-              </span>
-            </p>
+        <div className="mt-4 flex flex-col gap-2">
+          <button
+            onClick={() => changeStatus(task.id, task.status)}
+            className="py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition"
+          >
+            Change Status
+          </button>
 
-            {/* BUTTONS */}
-            <div className="mt-4 flex flex-col gap-2">
-              <button
-                onClick={() => changeStatus(task.id, task.status)}
-                className="py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition"
-              >
-                Change Status
-              </button>
-
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 transition"
-              >
-                Delete Task
-              </button>
-            </div>
-          </div>
-        ))}
+         {(user?.role === "ADMIN" || task.assignedTo === user?.id) && (
+         <button
+              onClick={() => deleteTask(task.id)}
+              className="py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 transition"
+               >
+                 Delete Task
+           </button>
+      )}
+        </div>
       </div>
+    ))}
+  </div>
+)}
     </div>
   );
 };

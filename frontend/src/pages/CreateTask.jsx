@@ -1,15 +1,31 @@
 import { useState } from "react";
 import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const CreateTask = () => {
   const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleCreate = async () => {
+const handleCreate = async () => {
+  if (!title.trim()) {
+    toast.error("Task title is required");
+    return;
+  }
+
+  setLoading(true);
+  
+  try {
     await API.post("/tasks", { title });
+    toast.success("Task created successfully 🎉");
     navigate("/tasks");
-  };
+  } catch (err) {
+    toast.error("Failed to create task");
+  } finally {
+    setLoading(false);
+  }
+};
 
 return (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-300">
@@ -32,9 +48,10 @@ return (
       {/* BUTTON */}
       <button
         onClick={handleCreate}
-        className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition"
+        className="w-full py-3 rounded-lg text-white font-semibold bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition disabled:opacity-50"
+        disabled={loading}
       >
-        Add Task
+        {loading ? "Creating..." : "Add Task"}
       </button>
 
       {/* BACK */}

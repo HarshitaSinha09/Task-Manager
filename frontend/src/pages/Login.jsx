@@ -2,6 +2,8 @@ import { useState, useContext } from "react";
 import API from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [data, setData] = useState({ email: "", password: "" });
@@ -24,11 +26,11 @@ const Login = () => {
       const res = await API.post("/auth/login", data);
       console.log("Login response:", res.data);
       await login(res.data.token);
+      toast.success("Login successful 🎉");
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
-      setError(err.response?.data || "Login failed. Please check your credentials.");
-    } finally {
+      toast.error(err.response?.data || "Login failed");    } finally {
       setLoading(false);
     }
   };
@@ -81,12 +83,11 @@ return (
       {/* 🔗 REGISTER */}
       <p className="mt-5 text-center text-sm text-gray-700">
         Don’t have an account?{" "}
-        <a
-          href="/register"
-          className="font-semibold text-purple-700 hover:underline"
-        >
+       <Link
+  to="/register"
+  className="font-semibold text-purple-700 hover:underline">
           Register here
-        </a>
+         </Link>
       </p>
     </div>
   </div>
